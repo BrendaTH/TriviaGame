@@ -6,27 +6,74 @@ var intervalId = 0;
 const questionTimerEndResponse = "out of time!";
 
 var theQuestions = [
-	{
-		question: "What is 10/2?",
+    {
+		question: "What are style sheets?",
 		answers: {
-			a: '3',
-			b: '5',
-			c: '115'
+			a: 'ARRRGHHH! Do not ask me that! Ever!',
+			b: 'They allow you to build style templates and make it (ahem..) easy to change the look and feel of a site ',
+			c: 'There is no such thing as a style sheet. It is called CSS.'
 		},
 		correctAnswer: 'b'
-	},
-	{
-		question: "What is 30/3?",
+    },
+    {
+		question: "What is a good HGTV metaphor for JavaScript?",
 		answers: {
-			a: '3',
-			b: '5',
-			c: '10'
+			a: 'P.I.T.A.',
+			b: "It's a lot like HTML",
+			c: 'JavaScript is like the electrical and plumbing in a house.'
+		},
+		correctAnswer: 'c'
+    },
+	{
+		question: "Which is the best color name supported by all browsers",
+		answers: {
+			a: 'AliceBlue',
+			b: 'PapayaWhip',
+			c: 'LawnGreen'
+		},
+		correctAnswer: 'c'
+    },
+    {
+		question: "What is a good HGTV metaphor for HTML?",
+		answers: {
+			a: 'P.I.T.A.',
+			b: "It's a lot like CSS",
+			c: 'HTML is the basic structure - walls, floors, etc..'
+		},
+		correctAnswer: 'c'
+    },
+    {
+		question: "How do you insert a copyright symbol on a browser page?",
+		answers: {
+			a: 'type &copy; or & #169; in an HTML file',
+			b: 'you cannot do that',
+			c: 'type copyright with quotes around it'
+		},
+		correctAnswer: 'a'
+    },
+    {
+		question: "Do all HTML tags come in pairs?",
+		answers: {
+			a: 'Yes. Unexpected results occur if you do not have both an open and closing tag',
+			b: 'There is no such thing as an HTML tag. It is called an element',
+			c: 'No, some HTML tags do not need a closing tag. Examples are <img> and <br>.'
+		},
+		correctAnswer: 'c'
+    },
+    {
+		question: "An HGTV metaphor for CSS is what?",
+		answers: {
+			a: 'P.I.T.A.',
+			b: 'It is a lot like HTML',
+			c: 'CSS is like the stylish furnishings in a house - curtains, carpets, colorful pillows, etc..'
 		},
 		correctAnswer: 'c'
     },
 ];
 // ==========================================================================
-// stopwatch OBJECTS 
+// stopwatch OBJECT
+// technically this is a timer not a stopwatch
+// but i use the word 'timer' so often in this file that i had to call this object something else
 var stopwatch = {
     time: 0,
     cbForTimerEnd: null,
@@ -59,13 +106,19 @@ var stopwatch = {
         this.cbForTimerEnd = cb;
         this.time = secs;
         if (this.displayTimer) {
-            $("#time-remaining").text("Time Remaining: 00:" + this.time);
+            this.displayTime("Time Remaining: 00:" + this.time);
         }
         // Use setInterval to start the count here and set the clock to running.
         intervalId = setInterval(stopwatch.count, 1000);
         clockRunning = true;
     },
-    
+    displayTime: function(theText) {
+        $("#time-remaining").text(theText);
+    }, 
+    removeTime: function() {
+        $("#time-remaining").text("");
+
+    },
     // the callback for the interval timer that's used to countdown the timer
     count: function() {
         var converted;
@@ -76,7 +129,7 @@ var stopwatch = {
             console.log("calling stop now");
             stopwatch.stop();
             if (stopwatch.displayTimer) {
-                $("#time-remaining").text("Time Remaining: 00:00");
+                stopwatch.displayTime("Time Remaining: 00:00")
             }
             stopwatch.cbForTimerEnd();
         } else if (stopwatch.displayTimer) {
@@ -85,7 +138,7 @@ var stopwatch = {
             //       and save the result in a variable.
             var converted = stopwatch.timeConverter(stopwatch.time);
             // Use the variable we just created to show the converted time in the "display" div.
-            $("#time-remaining").text("Time Remaining: " + converted);
+            stopwatch.displayTime("Time Remaining: " + converted);
         }
     },
 
@@ -135,79 +188,65 @@ var triviaGame = {
     },
     displayRestartButton: function() {
             // display restart button
-            var myButton = $('<button id="click-restart">Start Over?</button>');
-            // appendTo the content precedes the method and parent is passed in method
-            // myJQ.appendTo('#button-parent');
-            // append the parent precedes the method and content is passed in method
+            var myButton = $('<button class="button" id="click-restart">').text("Start Over?");
+            // 'appendTo' the content precedes the method and parent is passed in method
+            // myButton.appendTo('#restart-parent');
+            // 'append' the parent precedes the method and content is passed in method
             $("#restart-parent").append(myButton);
-            // html will replace all the other stuff (if any) in parent id
-            // $("#restart-parent").html(myJQ);
     },
 
     appendStatsToGradeClass: function(myText) {
-        var myString = '<div id="stat-results">' + myText + '</div>';
-        var aC = $(myString);
-        $("#grade").append(aC);
+        var myString = $('<div id="stat-results">').text(myText);
+        $("#grade").append(myString);
     },
 
     displayAnswerPage: function(letter) {
-        // display yes for correct
-        // or no for incorrect answer
-        // display oot for timeout on answer
-        // display correct answer
-        // setup timer for 5 or 10 seconds
-        // pass timer a cb for next state
+        // correct, incorrect, or out of time are our choices here
+        // so pick the display the answer, 
+        // then setup timer, pass cb for next state, don't show timer
         console.log("in display answer results page " + letter);
 
         var index = this.questionIndex;
-        // determine how we got here
         // then display the appropriate response
         if (theQuestions[index].correctAnswer === letter) {
             // correct guess
-            $("#grade").text("correct!");
-            var myText = "the correct answer was: " + letter + ":" + theQuestions[index].answers[letter];
-            var myString = '<div id="correct-answer">' + myText + '</div>';
-            var aC = $(myString);
-            $("#grade").append(aC);
+            this.displayAnswer("Correct!", index);
             this.correctQCount++;
         } else if ( letter === questionTimerEndResponse) {
-            // no guess timer ran out. 
-            $("#grade").text(questionTimerEndResponse);
-            var correctLetter = theQuestions[index].correctAnswer;
-            var myText = "the correct answer was: " + correctLetter + ":" + theQuestions[index].answers[correctLetter];
-            var myString = '<div id="correct-answer">' + myText + '</div>';
-            var aC = $(myString);
-            $("#grade").append(aC);
+            // timer ran out. 
+            this.displayAnswer(questionTimerEndResponse, index);
             this.noQCount++;
         } else {
             // incorrect guess
-            $("#grade").text("Nope!");
-            var correctLetter = theQuestions[index].correctAnswer;
-            var myText = "the correct answer was: " + correctLetter + ":" + theQuestions[index].answers[correctLetter];
-            var myString = '<div id="correct-answer">' + myText + '</div>';
-            var aC = $(myString);
-            $("#grade").append(aC);
+            this.displayAnswer("Nope!", index);
             this.incorrectQCount++;
         }
 
-        // wait for timer to fire before erasing page
+        // set up timer, with cb, don't display countdown
         var shouldTimerDisplay = false;
         stopwatch.start(triviaGame.cbForDisplayAnswerPage, this.answerTimeout, shouldTimerDisplay);
     },
+
+    displayAnswer: function(grade, index) {
+        var correctLetter = theQuestions[index].correctAnswer;
+        var text = "the correct answer was: " + correctLetter + ": " + theQuestions[index].answers[correctLetter];
+        $("#grade").text(grade);
+        var myString = $('<div id="correct-answer">').text(text);
+        $("#grade").append(myString);
+    },
+
     // questionPage: this method displays the questions, the multiple choice
     // answers, and the count down timer
     questionPage: function() {
-
-            // display the next question and it's answers
-            this.showQuestion(this.questionIndex);
-            var shouldTimerDisplay = true;
-            stopwatch.start(triviaGame.cbForQuestionOutOfTime, this.questionTimeout, shouldTimerDisplay);
+        // display the next question and it's answers
+        this.showQuestion(this.questionIndex);
+        var shouldTimerDisplay = true;
+        stopwatch.start(triviaGame.cbForQuestionOutOfTime, this.questionTimeout, shouldTimerDisplay);
     },
 
     showQuestion: function(index) {
         // recall that the question array is made up of object literals
         // each object literal has 3 properties - question, answers, and correct answer
-    
         // display question
         $("#trivia-question").text(theQuestions[index].question);
         // first reset the list of answers
@@ -215,17 +254,14 @@ var triviaGame = {
     
         // for each available answer to this question...display it as a choice
         for(letter in theQuestions[index].answers){
-            myString = '<div class="click-me" id="question'+index+'" value="'+letter+'">'
-                       + letter + ': ' + theQuestions[index].answers[letter] + '</div>';
-            var aC = $(myString);
-            aC.appendTo('#choices-parent');
+            myString = $('<div class="click-me" id="question'+index+'" value="'+letter+'">').text(letter + ': ' + theQuestions[index].answers[letter]);
+            myString.appendTo("#choices-parent");
         }
-
     },
 
     // timer reached zero without anser
     // put up wrong answer page
-    // don't use this as its a cb
+    // don't use 'this' as its a cb
     cbForQuestionOutOfTime: function() {
         console.log("in question timer ended call back now");
         triviaGame.removeQuestionPage();
@@ -248,13 +284,12 @@ var triviaGame = {
     },
 
     removeDisplayAnswerPage: function() {
-        $("#time-remaining").text("");
+        stopwatch.removeTime();
         $("#grade").text("");
         $("#correct-answer").remove();
     },
 
     removeQuestionPage: function() {
-        // remove info from the question
         stopwatch.stop();
         // remove trivia question
         $("#trivia-question").text("");
@@ -289,7 +324,6 @@ var triviaGame = {
         } );
 
         $("#choices-parent").on("click", ".click-me", function() {
-            alert("choice has been clicked!");
             // remove info from the questions page
             triviaGame.removeQuestionPage();
             triviaGame.displayAnswerPage($(this).attr("value"));
