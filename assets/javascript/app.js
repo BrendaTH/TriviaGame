@@ -13,7 +13,8 @@ var theQuestions = [
 			b: 'They allow you to build style templates and make it (ahem..) easy to change the look and feel of a site ',
 			c: 'There is no such thing as a style sheet. It is called CSS.'
 		},
-		correctAnswer: 'b'
+        correctAnswer: 'b',
+        action: "underline bold",
     },
     {
 		question: "What is a good HGTV metaphor for JavaScript?",
@@ -22,16 +23,21 @@ var theQuestions = [
 			b: "It's a lot like HTML",
 			c: 'JavaScript is like the electrical and plumbing in a house.'
 		},
-		correctAnswer: 'c'
+        correctAnswer: 'c',
+        action: "change background",
+        background: "plumbing.jpg",
+
     },
 	{
-		question: "Which is the best color name supported by all browsers",
+		question: "Which is our favorite color name supported by all browsers",
 		answers: {
 			a: 'AliceBlue',
 			b: 'PapayaWhip',
 			c: 'LawnGreen'
 		},
-		correctAnswer: 'c'
+        correctAnswer: 'c',
+        action: 'border and color',
+        border: 'lawngreen',
     },
     {
 		question: "What is a good HGTV metaphor for HTML?",
@@ -40,7 +46,9 @@ var theQuestions = [
 			b: "It's a lot like CSS",
 			c: 'HTML is the basic structure - walls, floors, etc..'
 		},
-		correctAnswer: 'c'
+        correctAnswer: 'c',
+        action: "change background",
+        background: "abstract-abstract-background-brick-wall-1693302.jpg"
     },
     {
 		question: "How do you insert a copyright symbol on a browser page?",
@@ -49,7 +57,9 @@ var theQuestions = [
 			b: 'you cannot do that',
 			c: 'type copyright with quotes around it'
 		},
-		correctAnswer: 'a'
+        correctAnswer: 'a',
+        action: "footer visibility",
+
     },
     {
 		question: "Do all HTML tags come in pairs?",
@@ -58,7 +68,8 @@ var theQuestions = [
 			b: 'There is no such thing as an HTML tag. It is called an element',
 			c: 'No, some HTML tags do not need a closing tag. Examples are <img> and <br>.'
 		},
-		correctAnswer: 'c'
+        correctAnswer: 'c',
+        action: "none",
     },
     {
 		question: "An HGTV metaphor for CSS is what?",
@@ -67,7 +78,9 @@ var theQuestions = [
 			b: 'It is a lot like HTML',
 			c: 'CSS is like the stylish furnishings in a house - curtains, carpets, colorful pillows, etc..'
 		},
-		correctAnswer: 'c'
+        correctAnswer: 'c',
+        action: "change background",
+        background: "background-coffee-contemporary-1305365.jpg",
     },
 ];
 // ==========================================================================
@@ -178,13 +191,34 @@ var triviaGame = {
         this.questionIndex = 0;
     },
 
+    returnPageToNormal: function() {
+        $('body').css('background', 'url("assets/images/design-development-electronics-med.jpg")');
+        $('.container').css('border', '15px solid rgb(146, 198, 171');
+        $('.container').css('bottom', '0');
+        $('#grade').css('text-decoration', 'none');
+        $('#grade').css('font-weight', 'normal');
+        $('#grade').css('color', 'green');
+        $('footer').css('visibility', 'hidden');
+    },
+
     statsPage: function() {
         console.log("in statsPage");
-        $("#grade").text("All done, here's how you did!");
+        if (this.correctQCount > this.incorrectQCount + this.noQCount) {
+            $('body').css('background', 'url("assets/images/adult-background-casual-941693.jpg")');
+            $("#grade").text("Great job! Here's how you did!");
+        } else {
+            $('body').css('background', 'url("assets/images/animals-aquatic-black-and-white-726478.jpg")');
+            $("#grade").text("Hmmmm.. maybe you need to attend office hours, and try to have a positive interaction with a TA this week. Here's how you did!");
+        }
         this.appendStatsToGradeClass("Correct Answers: " + this.correctQCount);
         this.appendStatsToGradeClass("Incorrect Answer: " + this.incorrectQCount);
         this.appendStatsToGradeClass("Unanswered: " + this.noQCount);
         this.displayRestartButton();
+        // run a timer to return the background to normal
+        var shouldTimerDisplay = false;
+        stopwatch.start(triviaGame.cbForStatsPage, this.statsTimeout, shouldTimerDisplay);
+
+
     },
     displayRestartButton: function() {
             // display restart button
@@ -233,6 +267,28 @@ var triviaGame = {
         $("#grade").text(grade);
         var myString = $('<div id="correct-answer">').text(text);
         $("#grade").append(myString);
+        switch (theQuestions[index].action) {
+            case "change background":
+                var imagePath = "assets/images/" + theQuestions[index].background;
+                $('body').css('background', 'url(' + imagePath + ')');
+                break;
+            case "border and color":
+                $('.container').css('border', '15px solid lawngreen');
+                $('#grade').css('color', 'lawngreen');
+                break;
+            case "footer visibility":
+                $('.container').css('bottom', '200px');
+                $('footer').css('visibility', 'visible');
+                break;
+            case "underline bold":
+                $('#grade').css('text-decoration', 'underline');
+                $('#grade').css('font-weight', 'bold');
+                break;
+            case "none":
+                // no action; do nothing
+                break;
+        }
+        //  bjt $(theQuestions[index].iD).attr('class', theQuestions[index].classToUse);
     },
 
     // questionPage: this method displays the questions, the multiple choice
@@ -273,6 +329,9 @@ var triviaGame = {
     // move on to next page -- either question page or stats page
     cbForDisplayAnswerPage: function() {
         console.log("in cbForDisplayAnswerPage");
+        triviaGame.returnPageToNormal();
+        // bjt 
+        $('#the-container').attr('class', 'container');
         triviaGame.removeDisplayAnswerPage();
         if (++triviaGame.questionIndex < theQuestions.length) {
             // more questions
@@ -281,6 +340,10 @@ var triviaGame = {
             // all done with this game display the stats
             triviaGame.statsPage();
         }
+    },
+
+    cbForStatsPage: function() {
+        triviaGame.returnPageToNormal();
     },
 
     removeDisplayAnswerPage: function() {
