@@ -50,12 +50,20 @@ h1 {
   margin: 4px 2px;
   transition-duration: 1s;
 }
+.click-me {
+  position: relative;
+}
+
 .button:hover,
-.button.selected {
+.button.selected,
+.click-me:hover,
+.click-me.selected {
   border: aliceblue;
   background-color: rgb(175, 106, 76); /* Green */
   color: aliceblue;
 }
+
+
 #grade {
   text-decoration: none;
   color: green;

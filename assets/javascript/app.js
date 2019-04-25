@@ -76,7 +76,7 @@ var theQuestions = [
 		answers: {
 			a: 'P.I.T.A.',
 			b: 'It is a lot like HTML',
-			c: 'CSS is like the stylish furnishings in a house - curtains, carpets, colorful pillows, etc..'
+			c: 'CSS is like the stylish furnishings in a house - curtains, flowers, colorful pillows, etc..'
 		},
         correctAnswer: 'c',
         action: "change background",
@@ -106,7 +106,6 @@ var stopwatch = {
     },
 
     stop: function() {
-
         // Use clearInterval to stop the count here and set the clock to not be running.
         clearInterval(intervalId);
         clockRunning = false;
@@ -189,6 +188,7 @@ var triviaGame = {
         this.incorrectQCount = 0;
         this.noQCount = 0;
         this.questionIndex = 0;
+        this.returnPageToNormal();
     },
 
     returnPageToNormal: function() {
@@ -217,8 +217,6 @@ var triviaGame = {
         // run a timer to return the background to normal
         var shouldTimerDisplay = false;
         stopwatch.start(triviaGame.cbForStatsPage, this.statsTimeout, shouldTimerDisplay);
-
-
     },
     displayRestartButton: function() {
             // display restart button
@@ -262,11 +260,16 @@ var triviaGame = {
     },
 
     displayAnswer: function(grade, index) {
-        var correctLetter = theQuestions[index].correctAnswer;
-        var text = "the correct answer was: " + correctLetter + ": " + theQuestions[index].answers[correctLetter];
         $("#grade").text(grade);
-        var myString = $('<div id="correct-answer">').text(text);
-        $("#grade").append(myString);
+        var myString = "<br> The correct answer was: <br>";
+        $("#grade").append(myString)
+
+        var correctLetter = theQuestions[index].correctAnswer;
+        var text = correctLetter + ":   " + theQuestions[index].answers[correctLetter];
+        myString = $('<div id="correct-answer">').text(text);
+        $("#grade").append(myString)
+            .hide()
+            .fadeIn(1500);
         switch (theQuestions[index].action) {
             case "change background":
                 var imagePath = "assets/images/" + theQuestions[index].background;
@@ -288,7 +291,6 @@ var triviaGame = {
                 // no action; do nothing
                 break;
         }
-        //  bjt $(theQuestions[index].iD).attr('class', theQuestions[index].classToUse);
     },
 
     // questionPage: this method displays the questions, the multiple choice
@@ -311,7 +313,9 @@ var triviaGame = {
         // for each available answer to this question...display it as a choice
         for(letter in theQuestions[index].answers){
             myString = $('<div class="click-me" id="question'+index+'" value="'+letter+'">').text(letter + ': ' + theQuestions[index].answers[letter]);
-            myString.appendTo("#choices-parent");
+            myString.appendTo("#choices-parent")
+                .hide()
+                .fadeIn(1500);
         }
     },
 
@@ -330,7 +334,6 @@ var triviaGame = {
     cbForDisplayAnswerPage: function() {
         console.log("in cbForDisplayAnswerPage");
         triviaGame.returnPageToNormal();
-        // bjt 
         $('#the-container').attr('class', 'container');
         triviaGame.removeDisplayAnswerPage();
         if (++triviaGame.questionIndex < theQuestions.length) {
@@ -358,7 +361,7 @@ var triviaGame = {
         $("#trivia-question").text("");
         // remove choices
         $('.click-me').each(function() {
-            $(this).remove();
+            (this).remove();
         });
     },
 
