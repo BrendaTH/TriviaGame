@@ -14,7 +14,7 @@ var theQuestions = [
 			c: 'There is no such thing as a style sheet. It is called CSS.'
 		},
         correctAnswer: 'b',
-        action: "underline bold",
+        action: 'none',
     },
     {
 		question: "What is a good HGTV metaphor for JavaScript?",
@@ -101,7 +101,6 @@ var stopwatch = {
     },
 
     reset: function() {
-        //console.log("reset stopwatch called. Stopping watch");
         this.stop();
     },
 
@@ -138,7 +137,6 @@ var stopwatch = {
         // because it's used in the interval callback
         stopwatch.time--;
         if (stopwatch.time <= 0) {
-            console.log("calling stop now");
             stopwatch.stop();
             if (stopwatch.displayTimer) {
                 stopwatch.displayTime("Time Remaining: 00:00")
@@ -179,7 +177,7 @@ var triviaGame = {
     incorrectQCount: 0,
     noQCount: 0,
     questionIndex: 0,
-    questionTimeout: 15,
+    questionTimeout: 30,
     answerTimeout: 5,
     statsTimeout: 5,
 
@@ -198,11 +196,19 @@ var triviaGame = {
         $('#grade').css('text-decoration', 'none');
         $('#grade').css('font-weight', 'normal');
         $('#grade').css('color', 'green');
-        $('footer').css('visibility', 'hidden');
+        if ($('footer').css('display') !== 'none') {
+            // don't do the animation unless we have shown the footer
+            $('footer').animate({left: '800px'}, "slow", function(){
+                $('footer').fadeOut('fast', function() {
+                    // fadeout essentially hid the footer, but we still have to
+                    // reposition footer for next time we show it.
+                    $('footer').css({'left': '25%'});
+                });
+            });
+        }
     },
 
     statsPage: function() {
-        console.log("in statsPage");
         if (this.correctQCount > this.incorrectQCount + this.noQCount) {
             $('body').css('background', 'url("assets/images/adult-background-casual-941693.jpg")');
             $("#grade").text("Great job! Here's how you did!");
@@ -236,7 +242,6 @@ var triviaGame = {
         // correct, incorrect, or out of time are our choices here
         // so pick the display the answer, 
         // then setup timer, pass cb for next state, don't show timer
-        console.log("in display answer results page " + letter);
 
         var index = this.questionIndex;
         // then display the appropriate response
@@ -267,30 +272,30 @@ var triviaGame = {
         var correctLetter = theQuestions[index].correctAnswer;
         var text = correctLetter + ":   " + theQuestions[index].answers[correctLetter];
         myString = $('<div id="correct-answer">').text(text);
-        $("#grade").append(myString)
-            .hide()
-            .fadeIn(1500);
+
         switch (theQuestions[index].action) {
             case "change background":
+                // put up a new background pic
                 var imagePath = "assets/images/" + theQuestions[index].background;
                 $('body').css('background', 'url(' + imagePath + ')');
                 break;
             case "border and color":
+                // change the border and color of the container and font
                 $('.container').css('border', '15px solid lawngreen');
                 $('#grade').css('color', 'lawngreen');
                 break;
             case "footer visibility":
+                // put in a footer
                 $('.container').css('bottom', '200px');
-                $('footer').css('visibility', 'visible');
-                break;
-            case "underline bold":
-                $('#grade').css('text-decoration', 'underline');
-                $('#grade').css('font-weight', 'bold');
+                $('footer').show();
                 break;
             case "none":
                 // no action; do nothing
                 break;
         }
+        $("#grade").append(myString)
+        .hide()
+        .fadeIn(1500);
     },
 
     // questionPage: this method displays the questions, the multiple choice
@@ -302,20 +307,23 @@ var triviaGame = {
         stopwatch.start(triviaGame.cbForQuestionOutOfTime, this.questionTimeout, shouldTimerDisplay);
     },
 
-    showQuestion: function(index) {
+    // qIndex is the index number into the list of question objects
+    showQuestion: function(qIndex) {
         // recall that the question array is made up of object literals
         // each object literal has 3 properties - question, answers, and correct answer
         // display question
-        $("#trivia-question").text(theQuestions[index].question);
+        $("#trivia-question").text(theQuestions[qIndex].question);
         // first reset the list of answers
         var myString = "";
     
         // for each available answer to this question...display it as a choice
-        for(letter in theQuestions[index].answers){
-            myString = $('<div class="click-me" id="question'+index+'" value="'+letter+'">').text(letter + ': ' + theQuestions[index].answers[letter]);
+        var i=0;
+        for(letter in theQuestions[qIndex].answers){
+            myString = $('<div class="click-me" id="question'+qIndex+'" data-letter="'+letter+'">').text(letter + ': ' + theQuestions[qIndex].answers[letter]);
             myString.appendTo("#choices-parent")
                 .hide()
-                .fadeIn(1500);
+                .delay(1500 * i++)
+                .fadeIn(700);
         }
     },
 
@@ -323,7 +331,6 @@ var triviaGame = {
     // put up wrong answer page
     // don't use 'this' as its a cb
     cbForQuestionOutOfTime: function() {
-        console.log("in question timer ended call back now");
         triviaGame.removeQuestionPage();
         // so from here we need the out of time page
         triviaGame.displayAnswerPage(questionTimerEndResponse);
@@ -332,7 +339,6 @@ var triviaGame = {
     // answer page has been displayed long enough
     // move on to next page -- either question page or stats page
     cbForDisplayAnswerPage: function() {
-        console.log("in cbForDisplayAnswerPage");
         triviaGame.returnPageToNormal();
         $('#the-container').attr('class', 'container');
         triviaGame.removeDisplayAnswerPage();
@@ -384,7 +390,6 @@ var triviaGame = {
         // start the first question
         //***************** */
         $("#start").on("click", function() {
-            console.log("at start button click");
             $(this).remove(); // remove start button
             triviaGame.questionPage();
         } );
@@ -392,11 +397,10 @@ var triviaGame = {
         $("#choices-parent").on("click", ".click-me", function() {
             // remove info from the questions page
             triviaGame.removeQuestionPage();
-            triviaGame.displayAnswerPage($(this).attr("value"));
+            triviaGame.displayAnswerPage($(this).attr("data-letter"));
         });
 
         $("#restart-parent").on("click", "#click-restart", function() {
-            console.log("at restart click");
             $(this).remove(); // remove restart button
             triviaGame.removeStatsPage();
             triviaGame.resetGame();

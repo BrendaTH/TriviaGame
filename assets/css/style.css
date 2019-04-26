@@ -4,7 +4,7 @@ body {
     line-height: 34px;
     background: url("../images/design-development-electronics-med.jpg");
 }
-
+strong { font-weight: bold; }
 .container {
     position: fixed;
     left: 25%;
@@ -14,18 +14,13 @@ body {
     border: 15px solid rgb(146, 198, 171);
     padding: 50px;
     margin: 20px;
-    /* font-weight: bold; */
-    /* font-size: 40px; */
     color: rgba(255, 253, 240, 0.829);
-    /* line-height: 50px; */
     background: hsl(28, 67%, 59%);
     max-width: 450px;
-    /* max-height: 800px; */
     margin-left: 0px;
     margin-right: auto;
     margin-top: 10px;
     margin-bottom: 5px;
-    /* height: 50px; */
 }
 
 h1 {
@@ -84,7 +79,7 @@ footer {
   margin-right: auto;
   margin-top: 10px;
   margin-bottom: 5px;
-  visibility: hidden;
+  display: none;
 }
 
   
