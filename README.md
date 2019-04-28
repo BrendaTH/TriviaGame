@@ -1,6 +1,6 @@
-#Total Trivial Trivia Game
+# Total Trivial Trivia Game
 
-###This is a trivia game using JavaScript for the logic and jQuery to manipulate HTML. 
+### This is a trivia game using JavaScript for the logic and jQuery to manipulate HTML. 
 Instructions were as follows:
 * Be sure to layout this app with valid HTML and stylish CSS.
 * Shows only one question until the player answers it or their time runs out.
